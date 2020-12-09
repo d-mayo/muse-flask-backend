@@ -1,6 +1,8 @@
 from flask import Flask, jsonify, g
 from flask_cors import CORS
 from resources.songs import song
+from resources.user import user
+from flask_login import LoginManager
 
 import models
 
@@ -10,6 +12,17 @@ PORT = 8000
 # Initialize an instance of the Flask class.
 # This starts the website!
 app = Flask(__name__)
+login_manager = LoginManager()
+app.secret_key = "LJAKLJLKJJLJKLSDJLKJASD" ## Need this to encode the session
+login_manager.init_app(app) # set up the sessions on the app
+
+@login_manager.user_loader # decorator function, that will load the user object whenever we access the session, we can get the user
+# by importing current_user from the flask_login
+def load_user(userid):
+    try:
+        return models.User.get(models.User.id == userid)
+    except models.DoesNotExist:
+        return None
 
 @app.before_request
 def before_request():
@@ -23,16 +36,13 @@ def after_request(response):
     g.db.close()
     return response
 
-@app.route('/<id>', methods=["GET"])
-def get_one_song(id):
-    print(id, 'reserved word?')
-    song = models.Song.get_by_id(id)
-    print(song.__dict__)
-    return jsonify(data=model_to_dict(song), status={"code": 200, "message": "Success"})
+CORS(song, origins=['http://localhost:3000'], supports_credentials=True) 
+app.register_blueprint(song, url_prefix='/api/v1/songs') 
 
-CORS(song, origins=['http://localhost:3000'], supports_credentials=True) # adding this line
+CORS(user, origins=['http://localhost:3000'], supports_credentials=True)
+app.register_blueprint(user, url_prefix='/user')
 
-app.register_blueprint(song, url_prefix='/api/v1/songs') # adding this line
+
 
 # Run the app when the program starts!
 if __name__ == '__main__':

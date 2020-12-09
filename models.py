@@ -1,10 +1,17 @@
-# import * means import everything from peewee
-
-from peewee import *
 import datetime
+from peewee import *
+from flask_login import UserMixin
 
 # Connect to a Postgres database.
 DATABASE = PostgresqlDatabase('muse-flask-backend', host='localhost', port=5432)
+
+class User(UserMixin, Model):
+    username = CharField(unique=True)
+    email = CharField(unique=True)
+    password = CharField()
+
+    class Meta:
+        database = DATABASE
 
 class Song(Model):
     title = CharField()
@@ -17,6 +24,6 @@ class Song(Model):
 
 def initialize():
     DATABASE.connect()
-    DATABASE.create_tables([Song], safe=True)
+    DATABASE.create_tables([User, Song], safe=True)
     print("TABLES Created")
     DATABASE.close()
