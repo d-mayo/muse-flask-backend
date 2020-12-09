@@ -23,3 +23,23 @@ def create_songs():
     song = models.Song.create(**payload)
     song_dict = model_to_dict(song)
     return jsonify(data=song_dict, status={"code": 201, "message": "Success"})
+  
+@song.route('/<id>', methods=["GET"])
+def get_one_song(id):
+    print(id, 'reserved word?')
+    song = models.Song.get_by_id(id)
+    print(song.__dict__)
+    return jsonify(data=model_to_dict(song), status={"code": 200, "message": "Success"})
+
+@song.route('/<id>', methods=["PUT"])
+def update_song(id):
+    payload = request.get_json()
+    query = models.Song.update(**payload).where(models.Song.id==id)
+    query.execute()
+    return jsonify(data=model_to_dict(models.Song.get_by_id(id)), status={"code": 200, "message": "resource updated successfully"})
+  
+@song.route('/<id>', methods=["Delete"])
+def delete_song(id):
+    query = models.Song.delete().where(models.Song.id==id)
+    query.execute()
+    return jsonify(data='resource successfully deleted', status={"code": 200, "message": "resource deleted successfully"})

@@ -23,6 +23,13 @@ def after_request(response):
     g.db.close()
     return response
 
+@app.route('/<id>', methods=["GET"])
+def get_one_song(id):
+    print(id, 'reserved word?')
+    song = models.Song.get_by_id(id)
+    print(song.__dict__)
+    return jsonify(data=model_to_dict(song), status={"code": 200, "message": "Success"})
+
 CORS(song, origins=['http://localhost:3000'], supports_credentials=True) # adding this line
 
 app.register_blueprint(song, url_prefix='/api/v1/songs') # adding this line
